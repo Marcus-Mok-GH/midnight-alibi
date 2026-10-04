@@ -688,7 +688,7 @@ async function endGame(caught){
   banner.className = "win-banner " + (caught ? "innocents" : "culprit");
   banner.textContent = caught ? "THE GUESTS WIN — the culprit is caught!" : "THE CULPRIT WINS — the truth leaves with them.";
   $("end-who").textContent = cul.name + " was the culprit";
-  $("end-role").textContent = "Rounds played: " + G.round + " · " + (caught ? "Caught on round " + G.round : "Never caught");
+  $("end-role").textContent = "Rounds played: " + Math.min(G.round, G.maxRounds) + " · " + (caught ? "Caught on round " + G.round : "Never caught");
   const epi = await hostNarrate(
 `Scenario: "${G.scenario.title}". The culprit was ${cul.name}; ${caught ? "the guests caught them in the final vote" : "the guests failed to catch them in time and the truth escaped"}.
 Write the host's closing narration: how the culprit's story ends, 3-5 cinematic sentences, family-friendly. Plain text.`,
