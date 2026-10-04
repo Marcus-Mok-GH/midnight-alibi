@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Midnight Alibi — AI-hosted party deduction</title>
+<title>Midnight Alibi: AI-hosted party deduction</title>
 <meta name="description" content="A pass-and-play social deduction party game narrated by an AI host. Secret roles, fresh mysteries every game, votes read aloud. Powered by Pollinations.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%95%AF%3C/text%3E%3C/svg%3E">
 <style>
@@ -153,7 +153,7 @@
             One player sets up the phone. The AI host invents a fresh mystery and deals a secret role to every player.
             Each round the host narrates a new twist, then the group discusses under a timer, then everyone votes
             pass-and-play. Catch the culprit before the rounds run out. Roles, votes and the winner are decided by
-            the game engine — the AI only writes the story, so it can never leak who did it.
+            the game engine: the AI only writes the story, so it can never leak who did it.
           </div>
         </details>
         <button id="btn-start">Begin the night 🌙</button>
@@ -186,7 +186,7 @@
         <h2>🗣️ Discussion</h2>
         <div class="timer" id="timer-display">2:00</div>
         <div class="hint" id="timer-sub">Convince the others you're innocent.</div>
-        <button id="btn-timer-skip">We've heard enough — vote now</button>
+        <button id="btn-timer-skip">We've heard enough: vote now</button>
       </div>
     </section>
 
@@ -226,7 +226,7 @@
 <script>
 "use strict";
 /* ============================================================
-   Midnight Alibi — AI-hosted pass-and-play social deduction.
+   Midnight Alibi: AI-hosted pass-and-play social deduction.
    Design rule: the ENGINE decides roles, eliminations and the
    winner in code (crypto-random). The AI host only narrates.
    ============================================================ */
@@ -337,36 +337,36 @@ const FALLBACKS = [
     title:"The Last Toast at Ashgrove Manor",
     setting:"A storm has closed the roads around an old manor during an anniversary dinner. The lights just failed.",
     incident:"The vintage wine meant for the midnight toast has been poisoned. The goblet is empty, the decanter lighter than it should be, and someone at this table poured it.",
-    culpritBriefing:"You poisoned the toast to stop a secret from being announced tonight. You have rehearsed your alibi — you were seen near the cellar, so point the finger at whoever was upstairs. Blend in. Lie well.",
+    culpritBriefing:"You poisoned the toast to stop a secret from being announced tonight. You have rehearsed your alibi: you were seen near the cellar, so point the finger at whoever was upstairs. Blend in. Lie well.",
     innocentBriefings:[
-      "You are the groundskeeper. You saw fresh mud on the cellar stairs long after the guests arrived — from shoes smaller than the butler's. Your objective: learn who slipped out during the storm.",
+      "You are the groundskeeper. You saw fresh mud on the cellar stairs long after the guests arrived, from shoes smaller than the butler's. Your objective: learn who slipped out during the storm.",
       "You are the visiting physician. You recognised the bitter almond scent on the decanter glass, but only two guests have access to such compounds. Your objective: identify who had a moment alone with it.",
-      "You are the family archivist. A page was torn from the house ledger this evening — the one that records who inherits. Your objective: figure out who benefits if the toast never happens.",
+      "You are the family archivist. A page was torn from the house ledger this evening: the one that records who inherits. Your objective: figure out who benefits if the toast never happens.",
       "You are the chef. The kitchen door was locked all evening, yet someone moved the decanter while you plated dessert. Your objective: find out who could walk through your kitchen unnoticed.",
-      "You are the widow's companion. You intercepted a note reading 'after the toast, they'll know' — the handwriting matches someone seated here. Your objective: compare hands tonight.",
+      "You are the widow's companion. You intercepted a note reading 'after the toast, they'll know', and the handwriting matches someone seated here. Your objective: compare hands tonight.",
       "You are the valet. A pair of grey gloves went missing from the hall closet an hour before dinner. Your objective: spot the guest hiding more than politeness tonight.",
       "You are the tutor. You heard the study window unlatch during the storm, though no one admits leaving the table. Your objective: catch the liar in the timeline.",
-      "You are the family lawyer. The will was to be read at midnight — the very toast someone tried to end. Your objective: work out who feared those words most.",
-      "You are the organist. During the blackout you felt someone brush past you toward the cellar door — silk, not wool. Your objective: name the silk tonight.",
-      "You are the night nurse. The master's tonic bottle is missing a dose — a dose that would smell of almonds if misused. Your objective: trace the tonic.",
-      "You are the gardener's daughter. The bell for the cellar rang once during the blackout — you were the only one near the bell rope. Your objective: force the culprit to explain the ring.",
+      "You are the family lawyer. The will was to be read at midnight: the very toast someone tried to end. Your objective: work out who feared those words most.",
+      "You are the organist. During the blackout you felt someone brush past you toward the cellar door: silk, not wool. Your objective: name the silk tonight.",
+      "You are the night nurse. The master's tonic bottle is missing a dose: a dose that would smell of almonds if misused. Your objective: trace the tonic.",
+      "You are the gardener's daughter. The bell for the cellar rang once during the blackout, and you were the only one near the bell rope. Your objective: force the culprit to explain the ring.",
     ],
   },
   {
     title:"Silent Orbit: Station Kestrel",
     setting:"A research station in high orbit, hosting a rare joint celebration between two rival crews. The station hums, dark on one side.",
-    incident:"The airlock between the habitation ring and the escape pods was armed during the party. Someone aboard wanted a way out — or a way to send someone else out.",
-    culpritBriefing:"You armed the airlock to protect a smuggled sample that would ruin you if inspected. You know the maintenance codes, so your alibi is 'checking sensors' — accuse the quiet ones and survive the vote.",
+    incident:"The airlock between the habitation ring and the escape pods was armed during the party. Someone aboard wanted a way out, or a way to send someone else out.",
+    culpritBriefing:"You armed the airlock to protect a smuggled sample that would ruin you if inspected. You know the maintenance codes, so your alibi is 'checking sensors'. Accuse the quiet ones and survive the vote.",
     innocentBriefings:[
       "You are the comms officer. The station log shows a manual override from a console only crew members can reach. Your objective: narrow the hands that know the code.",
       "You are the medic. The medbay's sedative kit is one ampoule light, and only trained personnel knew the locker's second latch. Your objective: expose the trained hand.",
       "You are the engineer. The override used a maintenance keycard that was reported lost two days ago. Your objective: find out who 'lost' it on purpose.",
-      "You are the botanist. Your sealed samples were rearranged — one vacuum-jar is missing. Your objective: learn who knew what those jars were.",
+      "You are the botanist. Your sealed samples were rearranged, and one vacuum-jar is missing. Your objective: learn who knew what those jars were.",
       "You are the pilot. The escape pod pre-launch checklist was quietly completed at 19:00, before the toast. Your objective: catch whoever planned ahead.",
       "You are the station cook. The galley lights flickered when someone drew power near the airlock corridor. Your objective: map who left the hall then.",
-      "You are the astronomer. You photographed the party for the crew album — one frame shows a figure near the wrong door. Your objective: ask where everyone was at that minute.",
+      "You are the astronomer. You photographed the party for the crew album. One frame shows a figure near the wrong door. Your objective: ask where everyone was at that minute.",
       "You are the cargo master. An EV suit's oxygen gauge reads 4% lower than at inspection. Your objective: make the borrower confess to something.",
-      "You are the diplomat. The treaty aboard this station would end a decade of rivalry — someone aboard dreads peace. Your objective: question motives, not alibis.",
+      "You are the diplomat. The treaty aboard this station would end a decade of rivalry, yet someone aboard dreads peace. Your objective: question motives, not alibis.",
       "You are the mechanic. A panel by the airlock was unscrewed with a torque driver only issued to senior staff. Your objective: shorten the suspect list.",
       "You are the archivist of the station's AI. The airlock alarm was muted from inside the party room itself. Your objective: figure out who stood near the console.",
     ],
@@ -454,10 +454,10 @@ async function testHost(){
   readSetup();
   const st = $("test-status");
   st.className = "status"; st.textContent = "Testing…";
-  if (!settings.key){ st.className = "status err"; st.textContent = "No key entered — the game will use built-in scenarios."; return; }
+  if (!settings.key){ st.className = "status err"; st.textContent = "No key entered. The game will use built-in scenarios."; return; }
   try {
     const reply = await askAI("Reply with exactly: The stage is set.", null, 20);
-    st.className = "status ok"; st.textContent = "Host is ready — " + reply.slice(0, 60);
+    st.className = "status ok"; st.textContent = "Host is ready: " + reply.slice(0, 60);
     speak("The stage is set.");
   } catch (e) {
     st.className = "status err";
@@ -495,7 +495,7 @@ async function startGame(){
   const players = names.map((p) => { while (seen.has(p)) p += "·"; seen.add(p); return p; }).slice(0, 12);
   if (players.length < 4){ const st = $("start-status"); st.className = "status err"; st.textContent = "At least 4 players needed."; return; }
 
-  const st = $("start-status"); st.className = "status"; st.textContent = settings.key ? "The host is writing tonight's mystery…" : "No key — dealing a built-in mystery…";
+  const st = $("start-status"); st.className = "status"; st.textContent = settings.key ? "The host is writing tonight's mystery…" : "No key: dealing a built-in mystery…";
   $("btn-start").disabled = true;
   newGame();
   G.players = players.map((name) => ({ name, alive:true, role:null, isCulprit:false }));
@@ -564,7 +564,7 @@ function revealRoles(){
           speak(p.isCulprit ? "You are the culprit. Lie well." : "You are innocent. Find the truth.");
         });
         const done = document.createElement("button");
-        done.textContent = "Memorised — hide & pass on";
+        done.textContent = "Memorised. Hide & pass on";
         done.onclick = () => { i += 1; next(); };
         body.append(done);
       });
@@ -583,7 +583,7 @@ async function runRounds(){
     const beat = await hostNarrate(
 `Scenario: "${G.scenario.title}". Setting: ${G.scenario.setting} Round ${G.round} of ${G.maxRounds}. Already eliminated: ${outInfo}.
 Write the host's narration for this round: one NEW event, discovery or clue that lands during the night (2-3 sentences, max 55 words). End with one sharp question that pushes the guests to argue. Plain text.`,
-      "Round " + G.round + " — the plot thickens",
+      "Round " + G.round + ": the plot thickens",
       () => ["A torn glove is found near the scene; it fits more than one guest tonight.",
              "The lights fail again; when they return, something small is missing from the table.",
              "A half-burned note surfaces, naming a place only the culprit would know."]
@@ -666,7 +666,7 @@ async function tallyScreen({ eliminated, tally, tie }){
   }
   const caught = eliminated?.isCulprit;
   const resultText = eliminated
-    ? `${eliminated.name} has the most votes and is out of the game. Their secret role: ${eliminated.isCulprit ? "THE CULPRIT. Caught red-handed!" : "innocent — the group got it wrong."}`
+    ? `${eliminated.name} has the most votes and is out of the game. Their secret role: ${eliminated.isCulprit ? "THE CULPRIT. Caught red-handed!" : "innocent. The group got it wrong."}`
     : tie ? "The votes are split. Nobody is eliminated tonight." : "Nobody reaches a majority. Nobody is eliminated tonight.";
   const narr = await hostNarrate(
 `Scenario: "${G.scenario.title}". Round ${G.round} votes: ${[...tally.entries()].map(([k, v]) => v + " vote" + (v > 1 ? "s" : "") + " for " + k).join(", ") || "none"}. Outcome: ${resultText}
@@ -686,7 +686,7 @@ async function endGame(caught){
   $("end-title").textContent = "🌙 The night ends";
   const banner = $("end-banner");
   banner.className = "win-banner " + (caught ? "innocents" : "culprit");
-  banner.textContent = caught ? "THE GUESTS WIN — the culprit is caught!" : "THE CULPRIT WINS — the truth leaves with them.";
+  banner.textContent = caught ? "THE GUESTS WIN! The culprit is caught!" : "THE CULPRIT WINS! The truth leaves with them.";
   $("end-who").textContent = cul.name + " was the culprit";
   $("end-role").textContent = "Rounds played: " + Math.min(G.round, G.maxRounds) + " · " + (caught ? "Caught on round " + G.round : "Never caught");
   const epi = await hostNarrate(

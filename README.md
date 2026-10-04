@@ -15,7 +15,7 @@ host* (#15726).
 **The game engine decides everything; the AI only writes the story.**
 
 - Roles are dealt to players with a crypto-random shuffle *after* the AI writes the
-  role cards — the AI never knows who holds which card, so it can never leak the
+  role cards: the AI never knows who holds which card, so it can never leak the
   culprit.
 - Votes are tallied in code. Ties eliminate nobody. The winner is decided in code.
 - The host's only job is atmosphere: the scenario, the round beats, the tally
@@ -23,16 +23,16 @@ host* (#15726).
 
 ## Features
 
-- **Pass-and-play on one device** — privacy screen with *hold-to-reveal* secret role
+- **Pass-and-play on one device**: privacy screen with *hold-to-reveal* secret role
   cards, so nobody peeks by accident.
-- **A new scenario every game** — setting, incident, culprit and innocent role cards
+- **A new scenario every game**: setting, incident, culprit and innocent role cards
   with distinct clues and personal objectives, generated live by the AI host.
-- **Narration aloud** — every beat is spoken with text-to-speech (voice picker); a
+- **Narration aloud**: every beat is spoken with text-to-speech (voice picker); a
   discussion timer with countdown beeps; the vote tally is read out dramatically.
-- **Bring Your Own Pollen** — the host pastes their own Pollinations API key. It's
+- **Bring Your Own Pollen**: the host pastes their own Pollinations API key. It's
   stored only in the browser and sent only to `gen.pollinations.ai`. A whole game
-  is a handful of small requests — typically well under 1 Pollen.
-- **Works without a key too** — if no key is provided (or the host is unreachable),
+  is a handful of small requests, typically well under 1 Pollen.
+- **Works without a key too**: if no key is provided (or the host is unreachable),
   the game deals one of the built-in mystery scenarios so the party never stalls.
 - Model and voice pickers load the **live Pollinations catalog**.
 
@@ -54,5 +54,5 @@ Get a key at [enter.pollinations.ai/keys](https://enter.pollinations.ai/keys).
 
 ## Credits
 
-Powered by [Pollinations](https://pollinations.ai) — text, speech and the model
+Powered by [Pollinations](https://pollinations.ai): text, speech and the model
 catalog all run on the Pollinations API.
