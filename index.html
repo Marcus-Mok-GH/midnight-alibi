@@ -694,7 +694,7 @@ async function endGame(caught){
 Write the host's closing narration: how the culprit's story ends, 3-5 cinematic sentences, family-friendly. Plain text.`,
     "🌙 The night ends",
     () => caught
-      ? `${cul.name} lowers their glass. There is nowhere left to hide, and the story ends the way all stories like this do — with the whole truth, at last, told aloud. Sleep well, honest guests.`
+      ? `${cul.name} lowers their glass. There is nowhere left to hide, and the story ends the way all stories like this do: with the whole truth, at last, told aloud. Sleep well, honest guests.`
       : `As the doors open, ${cul.name} smiles, thanks the host, and steps into the dark with the secret intact. Some nights the truth simply leaves with the last guest. This was one of those nights.`
   );
   $("end-narr").textContent = epi.text;
