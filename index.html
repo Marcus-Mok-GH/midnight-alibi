@@ -591,9 +591,9 @@ Write the host's narration for this round: one NEW event, discovery or clue that
     );
     await narrationScreen(beat.title, beat.text);
     await discussionTimer();
-    const eliminated = await votingPhase();
-    const caught = eliminated && eliminated.isCulprit;
-    await tallyScreen(eliminated);
+    const result = await votingPhase();
+    const caught = !!(result.eliminated && result.eliminated.isCulprit);
+    await tallyScreen(result);
     if (caught){ return endGame(true); }
   }
   return endGame(false);
