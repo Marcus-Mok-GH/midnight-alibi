@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Midnight Alibi — AI-hosted party deduction</title>
+<meta name="description" content="A pass-and-play social deduction party game narrated by an AI host. Secret roles, fresh mysteries every game, votes read aloud. Powered by Pollinations.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%95%AF%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0b1020; --panel:#151c33; --panel2:#1d2542; --ink:#eef1ff; --dim:#9aa3c7;
+    --gold:#e8c66a; --accent:#7c8cff; --danger:#ff7a7a; --ok:#7ce0a3; --radius:18px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; padding:0}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #1a2347 0%, var(--bg) 60%);
+    color:var(--ink); font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height:100dvh; padding:max(14px, env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:560px; margin:0 auto}
+  h1{font-family:Georgia, "Times New Roman", serif; letter-spacing:.5px; margin:8px 0 2px}
+  .tagline{color:var(--dim); margin:0 0 18px; font-size:14px}
+  .card{background:var(--panel); border:1px solid #2a3457; border-radius:var(--radius); padding:18px; margin:14px 0}
+  .card h2{font-family:Georgia, serif; margin:0 0 8px; font-size:19px}
+  .card h2 .accent{color:var(--gold)}
+  label{display:block; font-size:13px; color:var(--dim); margin:12px 0 5px}
+  input[type=text],input[type=password],select{
+    width:100%; background:var(--panel2); border:1px solid #39466e; color:var(--ink);
+    border-radius:12px; padding:12px 14px; font-size:16px; outline:none;
+  }
+  input:focus,select:focus{border-color:var(--accent)}
+  button{
+    width:100%; border:none; border-radius:14px; padding:15px; font-size:17px; font-weight:600;
+    background:linear-gradient(180deg,#8ea1ff,#5f6fe6); color:#fff; cursor:pointer; margin-top:14px;
+  }
+  button.secondary{background:var(--panel2); border:1px solid #39466e; color:var(--ink); font-weight:500}
+  button.small{width:auto; padding:9px 14px; font-size:14px; margin:0}
+  button:disabled{opacity:.45; cursor:not-allowed}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .row > *{flex:1}
+  .hint{font-size:13px; color:var(--dim); margin-top:6px}
+  .hint a{color:var(--accent)}
+  .pill{display:inline-block; background:var(--panel2); border:1px solid #39466e; border-radius:999px; padding:3px 10px; font-size:12px; color:var(--dim); margin:2px 4px 2px 0}
+  .players .p{display:flex; gap:8px; align-items:center; margin:8px 0}
+  .players .p input{flex:1}
+  .players .p button{width:auto; margin:0; padding:8px 12px; background:var(--panel2); border:1px solid #39466e; color:var(--dim)}
+  .players .p .num{color:var(--gold); font-weight:700; width:22px; text-align:center}
+  .hidden{display:none !important}
+  .status{margin-top:10px; font-size:14px; min-height:20px}
+  .status.err{color:var(--danger)}
+  .status.ok{color:var(--ok)}
+  .pass-head{text-align:center; padding:12px 0}
+  .pass-head .who{font-family:Georgia, serif; font-size:30px; color:var(--gold); margin:6px 0}
+  .pass-head .sub{color:var(--dim); font-size:14px}
+  .secret{
+    margin:20px 0; border-radius:20px; border:1px dashed #4a5580; min-height:200px;
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:20px;
+    background:var(--panel2); user-select:none; touch-action:none; cursor:pointer;
+  }
+  .secret .placeholder{color:var(--dim); font-size:15px}
+  .secret .role{display:none}
+  .secret.revealed .placeholder{display:none}
+  .secret.revealed .role{display:block}
+  .role .rname{font-family:Georgia, serif; font-size:26px; color:var(--gold); margin-bottom:8px}
+  .role .rtext{font-size:15px; text-align:left; white-space:pre-wrap}
+  .role .culprit-badge{color:var(--danger); font-weight:700; letter-spacing:1px; font-size:13px; display:block; margin-bottom:6px}
+  .narration{font-size:17px; line-height:1.65; white-space:pre-wrap}
+  .timer{font-family:Georgia, serif; font-size:74px; text-align:center; margin:12px 0; color:var(--gold)}
+  .vote-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+  .vote-grid button{margin:0; font-size:16px; padding:18px 8px}
+  .tally-line{display:flex; justify-content:space-between; border-bottom:1px solid #2a3457; padding:10px 2px; font-size:16px}
+  .tally-line .name{font-weight:600}
+  .tally-line .votes{color:var(--gold)}
+  .final-who{font-family:Georgia, serif; font-size:34px; color:var(--gold); text-align:center; margin:10px 0}
+  .win-banner{text-align:center; font-size:20px; font-weight:700; padding:10px; border-radius:14px; margin:12px 0}
+  .win-banner.innocents{background:rgba(124,224,163,.12); color:var(--ok)}
+  .win-banner.culprit{background:rgba(255,122,122,.12); color:var(--danger)}
+  .muted{color:var(--dim); font-size:14px}
+  details{margin-top:12px}
+  summary{cursor:pointer; color:var(--accent); font-size:14px}
+  footer{text-align:center; color:var(--dim); font-size:12px; margin:26px 0 10px}
+  footer a{color:var(--accent)}
+  .confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:50}
+  .confetti i{position:absolute; width:9px; height:14px; top:-20px; opacity:.9; animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .speaker{float:right; cursor:pointer; padding:4px; opacity:.85}
+  .round-pill{position:fixed; top:max(10px, env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
+    background:var(--panel2); border:1px solid #39466e; border-radius:999px; padding:4px 14px; font-size:13px; color:var(--gold); z-index:10}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="app">
+    <h1>🕯️ Midnight Alibi</h1>
+    <p class="tagline">A party deduction game narrated by an AI host. Pass one phone around the table.</p>
+
+    <!-- ============ SETUP ============ -->
+    <section id="scr-setup">
+      <div class="card">
+        <h2>The AI Host</h2>
+        <label for="key">Pollinations API key <span class="muted">(host pays with their own Pollen)</span></label>
+        <input id="key" type="password" placeholder="sk-… (optional)" autocomplete="off">
+        <div class="hint">Create a key at <a href="https://enter.pollinations.ai/keys" target="_blank" rel="noopener">enter.pollinations.ai/keys</a>. It is stored only on this device and sent only to gen.pollinations.ai. Without a key the game still runs with built-in mystery scenarios (no live narration).</div>
+        <div class="row">
+          <div>
+            <label for="model">Host text model</label>
+            <select id="model"><option value="">Default (auto)</option></select>
+          </div>
+          <div>
+            <label for="voice">Host voice</label>
+            <select id="voice">
+              <option>onyx</option><option>alloy</option><option>echo</option><option>fable</option>
+              <option>nova</option><option>shimmer</option><option>ash</option><option>ballad</option>
+              <option>coral</option><option>sage</option><option>verse</option>
+            </select>
+          </div>
+        </div>
+        <button class="secondary small" id="btn-test">Test host</button>
+        <div class="status" id="test-status"></div>
+      </div>
+
+      <div class="card players">
+        <h2>Players <span class="accent">(4–12)</span></h2>
+        <div id="player-list"></div>
+        <div class="row">
+          <button class="secondary small" id="btn-add">+ Add player</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>House rules</h2>
+        <div class="row">
+          <div>
+            <label for="timer">Discussion time</label>
+            <select id="timer">
+              <option value="60">60 seconds</option>
+              <option value="120" selected>2 minutes</option>
+              <option value="180">3 minutes</option>
+              <option value="300">5 minutes</option>
+            </select>
+          </div>
+          <div>
+            <label for="rounds">Rounds</label>
+            <select id="rounds"><option>2</option><option selected>3</option><option>4</option></select>
+          </div>
+        </div>
+        <label for="tts"><input type="checkbox" id="tts" checked style="width:auto"> Narrate aloud (text-to-speech)</label>
+        <details>
+          <summary>How to play</summary>
+          <div class="hint" style="margin-top:8px">
+            One player sets up the phone. The AI host invents a fresh mystery and deals a secret role to every player.
+            Each round the host narrates a new twist, then the group discusses under a timer, then everyone votes
+            pass-and-play. Catch the culprit before the rounds run out. Roles, votes and the winner are decided by
+            the game engine — the AI only writes the story, so it can never leak who did it.
+          </div>
+        </details>
+        <button id="btn-start">Begin the night 🌙</button>
+        <div class="status" id="start-status"></div>
+      </div>
+    </section>
+
+    <!-- ============ PASS-AND-PLAY REVEAL / VOTE ============ -->
+    <section id="scr-pass" class="hidden">
+      <div class="pass-head">
+        <div class="sub" id="pass-sub"></div>
+        <div class="who" id="pass-who"></div>
+      </div>
+      <div id="pass-body"></div>
+    </section>
+
+    <!-- ============ NARRATION ============ -->
+    <section id="scr-narr" class="hidden">
+      <div class="card">
+        <h2 id="narr-title"></h2>
+        <div class="narration" id="narr-text"></div>
+        <button id="btn-narr-next">Continue</button>
+        <button class="secondary small" id="btn-narr-replay" style="margin-top:10px">↻ Replay narration</button>
+      </div>
+    </section>
+
+    <!-- ============ DISCUSSION TIMER ============ -->
+    <section id="scr-timer" class="hidden">
+      <div class="card" style="text-align:center">
+        <h2>🗣️ Discussion</h2>
+        <div class="timer" id="timer-display">2:00</div>
+        <div class="hint" id="timer-sub">Convince the others you're innocent.</div>
+        <button id="btn-timer-skip">We've heard enough — vote now</button>
+      </div>
+    </section>
+
+    <!-- ============ TALLY ============ -->
+    <section id="scr-tally" class="hidden">
+      <div class="card">
+        <h2>⚖️ The host reads the votes</h2>
+        <div id="tally-list"></div>
+        <div class="narration" id="tally-narr" style="margin-top:12px"></div>
+        <button id="btn-tally-next">Continue</button>
+      </div>
+    </section>
+
+    <!-- ============ END ============ -->
+    <section id="scr-end" class="hidden">
+      <div class="card" style="text-align:center">
+        <h2 id="end-title"></h2>
+        <div class="win-banner" id="end-banner"></div>
+        <div class="final-who" id="end-who"></div>
+        <div class="muted" id="end-role"></div>
+        <div class="narration" id="end-narr" style="text-align:left; margin-top:14px"></div>
+        <button id="btn-again">New mystery</button>
+        <button class="secondary" id="btn-same">Same players, new mystery</button>
+      </div>
+    </section>
+
+    <footer>
+      Powered by <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations</a> ·
+      story by <span id="footer-model">AI host</span> · fairness by the game engine ·
+      <a href="https://github.com/Marcus-Mok-GH/midnight-alibi" target="_blank" rel="noopener">source</a>
+    </footer>
+  </div>
+</div>
+
+<div class="round-pill hidden" id="round-pill"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Midnight Alibi — AI-hosted pass-and-play social deduction.
+   Design rule: the ENGINE decides roles, eliminations and the
+   winner in code (crypto-random). The AI host only narrates.
+   ============================================================ */
+
+const API = "https://gen.pollinations.ai";
+
+/* ---------- tiny helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const show = (id) => { for (const s of document.querySelectorAll("section")) s.classList.add("hidden"); $(id).classList.remove("hidden"); window.scrollTo(0,0); };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const rand = (n) => { const b = new Uint32Array(1); crypto.getRandomValues(b); return b[0] % n; };
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function chunks(text){
+  // split narration into sentence-ish chunks for TTS (keeps GET URLs small)
+  const parts = text.match(/[^.!?\n]+[.!?]+|\S[^.!?\n]*$/g) || [text];
+  const out = []; let cur = "";
+  for (const p of parts){ if ((cur + p).length > 260 && cur){ out.push(cur.trim()); cur = ""; } cur += p; }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+/* ---------- settings ---------- */
+const settings = {
+  key: localStorage.getItem("ma:key") || "",
+  model: localStorage.getItem("ma:model") || "",
+  voice: localStorage.getItem("ma:voice") || "onyx",
+  tts: localStorage.getItem("ma:tts") !== "0",
+};
+function saveSettings(){
+  localStorage.setItem("ma:key", settings.key);
+  localStorage.setItem("ma:model", settings.model);
+  localStorage.setItem("ma:voice", settings.voice);
+  localStorage.setItem("ma:tts", settings.tts ? "1" : "0");
+}
+
+/* ---------- game state (all decided in code) ---------- */
+let G = null;
+function newGame(){
+  G = { players:[], roles:[], culpritIndex:-1, round:0, maxRounds:3, timerSecs:120, phase:"setup", aiLive:true };
+}
+
+/* ---------- Pollinations: text ---------- */
+async function askAI(userPrompt, system, maxTokens = 700){
+  const body = {
+    model: settings.model || "openai/gpt-5.4-nano",
+    temperature: 1,
+    max_tokens: maxTokens,
+    messages: [
+      { role:"system", content: system || "You are the witty, dramatic AI host of a live party deduction game. Keep everything family-friendly, vivid and short. Plain text output only." },
+      { role:"user", content: userPrompt },
+    ],
+  };
+  const res = await fetch(API + "/v1/chat/completions", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", ...(settings.key ? { Authorization:"Bearer " + settings.key } : {}) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("host " + res.status);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (typeof content !== "string" || !content.trim()) throw new Error("empty host reply");
+  return content.trim();
+}
+function parseJSONish(text){
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const raw = fence ? fence[1] : text;
+  const start = raw.indexOf("{"), end = raw.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("no JSON in host reply");
+  return JSON.parse(raw.slice(start, end + 1));
+}
+
+/* ---------- Pollinations: speech ---------- */
+const ttsQ = { q:[], busy:false };
+function speak(text){
+  if (!settings.tts || !settings.key) return;
+  ttsQ.q.push(...chunks(text));
+  pumpTTS();
+}
+function stopSpeaking(){ ttsQ.q.length = 0; ttsQ.busy = false; if (audio) { audio.pause(); audio = null; } }
+let audio = null;
+async function pumpTTS(){
+  if (ttsQ.busy) return;
+  ttsQ.busy = true;
+  try {
+    while (ttsQ.q.length){
+      const text = ttsQ.q.shift();
+      const url = `${API}/audio/${encodeURIComponent(text)}?voice=${encodeURIComponent(settings.voice)}&key=${encodeURIComponent(settings.key)}`;
+      audio = new Audio(url);
+      audio.onended = null; audio.onerror = () => {}; // silent: text is always on screen
+      try { await audio.play(); await new Promise((r) => { audio.onended = r; audio.onerror = r; }); } catch {}
+    }
+  } finally { ttsQ.busy = false; audio = null; }
+}
+function beep(freq = 880){
+  try {
+    const ctx = beep.ctx || (beep.ctx = new (window.AudioContext || window.webkitAudioContext)());
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = freq; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o.start(); o.stop(ctx.currentTime + 0.25);
+  } catch {}
+}
+
+/* ---------- built-in fallback scenarios (no key / host down) ---------- */
+const FALLBACKS = [
+  {
+    title:"The Last Toast at Ashgrove Manor",
+    setting:"A storm has closed the roads around an old manor during an anniversary dinner. The lights just failed.",
+    incident:"The vintage wine meant for the midnight toast has been poisoned. The goblet is empty, the decanter lighter than it should be, and someone at this table poured it.",
+    culpritBriefing:"You poisoned the toast to stop a secret from being announced tonight. You have rehearsed your alibi — you were seen near the cellar, so point the finger at whoever was upstairs. Blend in. Lie well.",
+    innocentBriefings:[
+      "You are the groundskeeper. You saw fresh mud on the cellar stairs long after the guests arrived — from shoes smaller than the butler's. Your objective: learn who slipped out during the storm.",
+      "You are the visiting physician. You recognised the bitter almond scent on the decanter glass, but only two guests have access to such compounds. Your objective: identify who had a moment alone with it.",
+      "You are the family archivist. A page was torn from the house ledger this evening — the one that records who inherits. Your objective: figure out who benefits if the toast never happens.",
+      "You are the chef. The kitchen door was locked all evening, yet someone moved the decanter while you plated dessert. Your objective: find out who could walk through your kitchen unnoticed.",
+      "You are the widow's companion. You intercepted a note reading 'after the toast, they'll know' — the handwriting matches someone seated here. Your objective: compare hands tonight.",
+      "You are the valet. A pair of grey gloves went missing from the hall closet an hour before dinner. Your objective: spot the guest hiding more than politeness tonight.",
+      "You are the tutor. You heard the study window unlatch during the storm, though no one admits leaving the table. Your objective: catch the liar in the timeline.",
+      "You are the family lawyer. The will was to be read at midnight — the very toast someone tried to end. Your objective: work out who feared those words most.",
+      "You are the organist. During the blackout you felt someone brush past you toward the cellar door — silk, not wool. Your objective: name the silk tonight.",
+      "You are the night nurse. The master's tonic bottle is missing a dose — a dose that would smell of almonds if misused. Your objective: trace the tonic.",
+      "You are the gardener's daughter. The bell for the cellar rang once during the blackout — you were the only one near the bell rope. Your objective: force the culprit to explain the ring.",
+    ],
+  },
+  {
+    title:"Silent Orbit: Station Kestrel",
+    setting:"A research station in high orbit, hosting a rare joint celebration between two rival crews. The station hums, dark on one side.",
+    incident:"The airlock between the habitation ring and the escape pods was armed during the party. Someone aboard wanted a way out — or a way to send someone else out.",
+    culpritBriefing:"You armed the airlock to protect a smuggled sample that would ruin you if inspected. You know the maintenance codes, so your alibi is 'checking sensors' — accuse the quiet ones and survive the vote.",
+    innocentBriefings:[
+      "You are the comms officer. The station log shows a manual override from a console only crew members can reach. Your objective: narrow the hands that know the code.",
+      "You are the medic. The medbay's sedative kit is one ampoule light, and only trained personnel knew the locker's second latch. Your objective: expose the trained hand.",
+      "You are the engineer. The override used a maintenance keycard that was reported lost two days ago. Your objective: find out who 'lost' it on purpose.",
+      "You are the botanist. Your sealed samples were rearranged — one vacuum-jar is missing. Your objective: learn who knew what those jars were.",
+      "You are the pilot. The escape pod pre-launch checklist was quietly completed at 19:00, before the toast. Your objective: catch whoever planned ahead.",
+      "You are the station cook. The galley lights flickered when someone drew power near the airlock corridor. Your objective: map who left the hall then.",
+      "You are the astronomer. You photographed the party for the crew album — one frame shows a figure near the wrong door. Your objective: ask where everyone was at that minute.",
+      "You are the cargo master. An EV suit's oxygen gauge reads 4% lower than at inspection. Your objective: make the borrower confess to something.",
+      "You are the diplomat. The treaty aboard this station would end a decade of rivalry — someone aboard dreads peace. Your objective: question motives, not alibis.",
+      "You are the mechanic. A panel by the airlock was unscrewed with a torque driver only issued to senior staff. Your objective: shorten the suspect list.",
+      "You are the archivist of the station's AI. The airlock alarm was muted from inside the party room itself. Your objective: figure out who stood near the console.",
+    ],
+  },
+];
+
+/* ---------- scenario generation (AI, with fallback) ---------- */
+async function buildScenario(n){
+  const sys = "You are the AI host of a live party deduction game. Family-friendly, cinematic, concise. When asked for JSON you return STRICT JSON with no markdown fences, no commentary.";
+  const prompt =
+`We are ${n} players around a table playing a one-night deduction game. Invent a brand-new scenario. Vary the genre freely (manor, cruise, film set, space station, museum night, wedding, snowed-in inn, recording studio, subway party...).
+
+Return STRICT JSON exactly in this shape:
+{
+ "title": "short catchy title",
+ "setting": "1-2 sentences, place and mood",
+ "incident": "2-3 sentences: the crime or scandal that starts the game",
+ "culpritBriefing": "second-person secret card for the ONE culprit: what they did, why, and how to deflect suspicion. 3-4 sentences. Never mention the player's real name.",
+ "innocentBriefings": [ exactly ${n - 1} second-person secret cards like the culprit's but for innocents: each holds one distinct clue or piece of knowledge about the night, plus a personal objective. 3-4 sentences each. No real names. ]
+}`;
+  try {
+    if (!settings.key) throw new Error("no key");
+    const text = await askAI(prompt, sys, 1200);
+    const sc = parseJSONish(text);
+    if (!sc.title || !sc.setting || !sc.incident || !sc.culpritBriefing || !Array.isArray(sc.innocentBriefings)) throw new Error("bad scenario shape");
+    while (sc.innocentBriefings.length < n - 1) sc.innocentBriefings.push(FALLBACKS[0].innocentBriefings[sc.innocentBriefings.length % FALLBACKS[0].innocentBriefings.length]);
+    sc.innocentBriefings = sc.innocentBriefings.slice(0, n - 1);
+    return { ...sc, aiLive:true };
+  } catch (e) {
+    const fb = FALLBACKS[rand(FALLBACKS.length)];
+    return {
+      title: fb.title, setting: fb.setting, incident: fb.incident,
+      culpritBriefing: fb.culpritBriefing,
+      innocentBriefings: shuffle([...fb.innocentBriefings]).slice(0, n - 1),
+      aiLive:false,
+    };
+  }
+}
+
+/* ---------- setup screen ---------- */
+function defaultPlayers(){ return ["Ada","Basil","Clara","Dmitri","Elena","Felix"]; }
+let playerRows = [];
+function renderPlayers(){
+  const wrap = $("player-list"); wrap.innerHTML = "";
+  playerRows.forEach((name, i) => {
+    const row = document.createElement("div"); row.className = "p";
+    row.innerHTML = `<span class="num">${i + 1}</span>`;
+    const inp = document.createElement("input");
+    inp.type = "text"; inp.value = name; inp.placeholder = "Player " + (i + 1);
+    inp.oninput = () => { playerRows[i] = inp.value; };
+    const del = document.createElement("button");
+    del.textContent = "✕"; del.disabled = playerRows.length <= 4;
+    del.onclick = () => { playerRows.splice(i, 1); renderPlayers(); };
+    row.append(inp, del); wrap.append(row);
+  });
+  $("btn-add").disabled = playerRows.length >= 12;
+}
+async function loadModels(){
+  try {
+    const [text] = await Promise.all([
+      fetch(API + "/text/models").then((r) => r.json()),
+    ]);
+    const healthy = text.filter((m) => m?.health?.status === "healthy" && !m.community && m.name?.includes("gpt-5.4-nano"));
+    const sel = $("model"); sel.innerHTML = `<option value="">Default (auto)</option>`;
+    for (const m of text.filter((m) => m?.health?.status === "healthy" && !m.community).slice(0, 25)){
+      const o = document.createElement("option"); o.value = m.name; o.textContent = m.name;
+      if (settings.model === m.name) o.selected = true;
+      sel.append(o);
+    }
+    if (healthy.length) { sel.value = settings.model || "openai/gpt-5.4-nano"; settings.model = sel.value; }
+  } catch {}
+  $("voice").value = settings.voice;
+  $("tts").checked = settings.tts;
+  $("key").value = settings.key;
+}
+function readSetup(){
+  settings.key = $("key").value.trim();
+  settings.model = $("model").value || "";
+  settings.voice = $("voice").value;
+  settings.tts = $("tts").checked;
+  saveSettings();
+  $("footer-model").textContent = settings.key ? "AI host " + (settings.model || "(auto)") : "built-in scenarios";
+}
+async function testHost(){
+  readSetup();
+  const st = $("test-status");
+  st.className = "status"; st.textContent = "Testing…";
+  if (!settings.key){ st.className = "status err"; st.textContent = "No key entered — the game will use built-in scenarios."; return; }
+  try {
+    const reply = await askAI("Reply with exactly: The stage is set.", null, 20);
+    st.className = "status ok"; st.textContent = "Host is ready — " + reply.slice(0, 60);
+    speak("The stage is set.");
+  } catch (e) {
+    st.className = "status err";
+    st.textContent = "Key rejected or host unreachable (" + e.message + "). Check the key at enter.pollinations.ai/keys; built-in scenarios still work.";
+  }
+}
+
+/* ---------- pass-and-play generic flow ---------- */
+function passScreen(who, sub, bodyBuilder){
+  $("pass-who").textContent = who;
+  $("pass-sub").textContent = sub;
+  const body = $("pass-body"); body.innerHTML = "";
+  bodyBuilder(body);
+  show("scr-pass");
+}
+async function holdToReveal(body, onOpen){
+  const box = document.createElement("div"); box.className = "secret";
+  const ph = document.createElement("div"); ph.className = "placeholder";
+  ph.innerHTML = "🤫<br><br><b>HOLD to reveal your secret role</b><br>Keep the screen to yourself";
+  box.append(ph);
+  let open = false, timer = null;
+  const down = () => { if (!open){ box.classList.add("revealed"); onOpen(box); open = true; } };
+  const up = () => { if (open){ box.classList.remove("revealed"); open = false; } };
+  box.addEventListener("pointerdown", (e) => { e.preventDefault(); timer = setTimeout(down, 250); });
+  box.addEventListener("pointerup", () => { clearTimeout(timer); });
+  box.addEventListener("pointerleave", () => { clearTimeout(timer); });
+  body.append(box);
+}
+
+/* ---------- game flow ---------- */
+async function startGame(){
+  readSetup();
+  const names = playerRows.map((p) => p.trim()).map((p, i) => p || "Player " + (i + 1));
+  const seen = new Set();
+  const players = names.map((p) => { while (seen.has(p)) p += "·"; seen.add(p); return p; }).slice(0, 12);
+  if (players.length < 4){ const st = $("start-status"); st.className = "status err"; st.textContent = "At least 4 players needed."; return; }
+
+  const st = $("start-status"); st.className = "status"; st.textContent = settings.key ? "The host is writing tonight's mystery…" : "No key — dealing a built-in mystery…";
+  $("btn-start").disabled = true;
+  newGame();
+  G.players = players.map((name) => ({ name, alive:true, role:null, isCulprit:false }));
+  G.maxRounds = parseInt($("rounds").value, 10);
+  G.timerSecs = parseInt($("timer").value, 10);
+
+  const sc = await buildScenario(players.length);
+  G.scenario = sc;
+  G.aiLive = sc.aiLive;
+
+  // ENGINE assigns roles: crypto-shuffle, the AI never knows who is who.
+  const briefings = shuffle([{ text: sc.culpritBriefing, culprit:true }].concat(sc.innocentBriefings.map((t) => ({ text:t, culprit:false }))));
+  briefings.forEach((b, i) => { G.players[i].briefing = b; G.players[i].isCulprit = b.culprit; });
+  const cul = G.players.find((p) => p.isCulprit);
+  G.culpritName = cul.name;
+  st.textContent = ""; $("btn-start").disabled = false;
+
+  // kick off with a welcome narration
+  const intro = await hostNarrate(
+`Scenario: "${sc.title}". Setting: ${sc.setting} Incident: ${sc.incident}.
+As the party host, welcome the ${players.length} guests dramatically, set the scene in 3-4 short sentences, and end by saying the game of accusation is about to begin. Plain text, max 80 words.`,
+    "Welcome to " + sc.title,
+    () => `Good evening. ${sc.setting} ${sc.incident} Tonight, one of you is hiding something. Watch each other closely.`
+  );
+  await narrationScreen(intro.title, intro.text);
+  await revealRoles();
+  await runRounds();
+}
+
+async function hostNarrate(prompt, title, offlineText){
+  let text = null;
+  if (settings.key){
+    try { text = await askAI(prompt, undefined, 260); }
+    catch { text = null; }
+  }
+  if (!text) text = offlineText();
+  return { title, text };
+}
+
+function narrationScreen(title, text){
+  return new Promise((resolve) => {
+    $("narr-title").textContent = title;
+    $("narr-text").textContent = text;
+    show("scr-narr");
+    speak(text);
+    $("btn-narr-replay").classList.toggle("hidden", !settings.key);
+    $("btn-narr-next").onclick = () => { stopSpeaking(); resolve(); };
+    $("btn-narr-replay").onclick = () => { stopSpeaking(); speak(text); };
+  });
+}
+
+function revealRoles(){
+  return new Promise((resolve) => {
+    let i = 0;
+    const next = () => {
+      if (i >= G.players.length){ resolve(); return; }
+      const p = G.players[i];
+      passScreen(p.name, "Pass the phone to " + p.name + ". Everyone else, eyes on the table.", (body) => {
+        holdToReveal(body, (box) => {
+          const r = document.createElement("div"); r.className = "role";
+          r.innerHTML = (p.isCulprit
+            ? `<span class="culprit-badge">☠ YOU ARE THE CULPRIT</span>`
+            : `<span class="culprit-badge" style="color:var(--ok)">YOU ARE INNOCENT</span>`)
+            + `<div class="rtext">${p.briefing.text}</div>`;
+          box.append(r);
+          speak(p.isCulprit ? "You are the culprit. Lie well." : "You are innocent. Find the truth.");
+        });
+        const done = document.createElement("button");
+        done.textContent = "Memorised — hide & pass on";
+        done.onclick = () => { i += 1; next(); };
+        body.append(done);
+      });
+    };
+    next();
+  });
+}
+
+async function runRounds(){
+  for (G.round = 1; G.round <= G.maxRounds; G.round++){
+    $("round-pill").classList.remove("hidden");
+    $("round-pill").textContent = "Round " + G.round + " of " + G.maxRounds;
+
+    const alive = G.players.filter((p) => p.alive);
+    const outInfo = G.players.filter((p) => !p.alive).map((p) => p.name + " (eliminated)").join(", ") || "nobody yet";
+    const beat = await hostNarrate(
+`Scenario: "${G.scenario.title}". Setting: ${G.scenario.setting} Round ${G.round} of ${G.maxRounds}. Already eliminated: ${outInfo}.
+Write the host's narration for this round: one NEW event, discovery or clue that lands during the night (2-3 sentences, max 55 words). End with one sharp question that pushes the guests to argue. Plain text.`,
+      "Round " + G.round + " — the plot thickens",
+      () => ["A torn glove is found near the scene; it fits more than one guest tonight.",
+             "The lights fail again; when they return, something small is missing from the table.",
+             "A half-burned note surfaces, naming a place only the culprit would know."]
+        [ (G.round - 1) % 3 ] + " What will you do with what you just learned?"
+    );
+    await narrationScreen(beat.title, beat.text);
+    await discussionTimer();
+    const eliminated = await votingPhase();
+    const caught = eliminated && eliminated.isCulprit;
+    await tallyScreen(eliminated);
+    if (caught){ return endGame(true); }
+  }
+  return endGame(false);
+}
+
+function discussionTimer(){
+  return new Promise((resolve) => {
+    let left = G.timerSecs;
+    const fmt = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    $("timer-display").textContent = fmt(left);
+    show("scr-timer");
+    speak("Time to discuss. Convince each other.");
+    const iv = setInterval(() => {
+      left--;
+      $("timer-display").textContent = fmt(Math.max(left, 0));
+      if (left === 10) { beep(); speak("Ten seconds."); }
+      if (left <= 5 && left > 0) beep(660);
+      if (left <= 0){ clearInterval(iv); stopSpeaking(); resolve(); }
+    }, 1000);
+    $("btn-timer-skip").onclick = () => { clearInterval(iv); stopSpeaking(); resolve(); };
+  });
+}
+
+function votingPhase(){
+  return new Promise((resolve) => {
+    const alive = G.players.filter((p) => p.alive);
+    const votes = new Map(); // voterName -> targetName
+    let i = 0;
+    const finish = () => {
+      // ENGINE tallies. Ties eliminate nobody.
+      const tally = new Map();
+      for (const t of votes.values()) tally.set(t, (tally.get(t) || 0) + 1);
+      let top = null, topN = 0, tie = false;
+      for (const [name, n] of tally){
+        if (n > topN){ top = name; topN = n; tie = false; }
+        else if (n === topN && top) tie = true;
+      }
+      const eliminated = top && !tie ? G.players.find((p) => p.name === top && p.alive) : null;
+      if (eliminated) eliminated.alive = false;
+      resolve({ eliminated, tally, tie });
+    };
+    const next = () => {
+      if (i >= alive.length){ finish(); return; }
+      const voter = alive[i];
+      passScreen(voter.name, voter.name + ", cast your vote. Others, look away.", (body) => {
+        const grid = document.createElement("div"); grid.className = "vote-grid";
+        for (const t of alive){
+          if (t === voter) continue;
+          const b = document.createElement("button");
+          b.textContent = t.name;
+          b.onclick = () => { votes.set(voter.name, t.name); i += 1; next(); };
+          grid.append(b);
+        }
+        body.append(grid);
+        speak(voter.name + ", who do you accuse?");
+      });
+    };
+    next();
+  });
+}
+
+async function tallyScreen({ eliminated, tally, tie }){
+  const list = $("tally-list"); list.innerHTML = "";
+  const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  if (!sorted.length) list.innerHTML = `<div class="muted">No votes were cast.</div>`;
+  for (const [name, n] of sorted){
+    const d = document.createElement("div"); d.className = "tally-line";
+    d.innerHTML = `<span class="name">${name}</span><span class="votes">${"●".repeat(n)} ${n}</span>`;
+    list.append(d);
+  }
+  const caught = eliminated?.isCulprit;
+  const resultText = eliminated
+    ? `${eliminated.name} has the most votes and is out of the game. Their secret role: ${eliminated.isCulprit ? "THE CULPRIT. Caught red-handed!" : "innocent — the group got it wrong."}`
+    : tie ? "The votes are split. Nobody is eliminated tonight." : "Nobody reaches a majority. Nobody is eliminated tonight.";
+  const narr = await hostNarrate(
+`Scenario: "${G.scenario.title}". Round ${G.round} votes: ${[...tally.entries()].map(([k, v]) => v + " vote" + (v > 1 ? "s" : "") + " for " + k).join(", ") || "none"}. Outcome: ${resultText}
+As the host, read out this result dramatically in 2-4 short sentences. Plain text.`,
+    "⚖️ The votes are in",
+    () => resultText
+  );
+  $("tally-narr").textContent = narr.text;
+  show("scr-tally");
+  speak(narr.text);
+  await new Promise((resolve) => { $("btn-tally-next").onclick = () => { stopSpeaking(); resolve(); }; });
+}
+
+async function endGame(caught){
+  $("round-pill").classList.add("hidden");
+  const cul = G.players.find((p) => p.isCulprit);
+  $("end-title").textContent = "🌙 The night ends";
+  const banner = $("end-banner");
+  banner.className = "win-banner " + (caught ? "innocents" : "culprit");
+  banner.textContent = caught ? "THE GUESTS WIN — the culprit is caught!" : "THE CULPRIT WINS — the truth leaves with them.";
+  $("end-who").textContent = cul.name + " was the culprit";
+  $("end-role").textContent = "Rounds played: " + G.round + " · " + (caught ? "Caught on round " + G.round : "Never caught");
+  const epi = await hostNarrate(
+`Scenario: "${G.scenario.title}". The culprit was ${cul.name}; ${caught ? "the guests caught them in the final vote" : "the guests failed to catch them in time and the truth escaped"}.
+Write the host's closing narration: how the culprit's story ends, 3-5 cinematic sentences, family-friendly. Plain text.`,
+    "🌙 The night ends",
+    () => caught
+      ? `${cul.name} lowers their glass. There is nowhere left to hide, and the story ends the way all stories like this do — with the whole truth, at last, told aloud. Sleep well, honest guests.`
+      : `As the doors open, ${cul.name} smiles, thanks the host, and steps into the dark with the secret intact. Some nights the truth simply leaves with the last guest. This was one of those nights.`
+  );
+  $("end-narr").textContent = epi.text;
+  show("scr-end");
+  speak(epi.text);
+  if (caught) confetti();
+  $("btn-again").onclick = () => { stopSpeaking(); show("scr-setup"); };
+  $("btn-same").onclick = () => { stopSpeaking(); startGame(); };
+}
+
+function confetti(){
+  const c = document.createElement("div"); c.className = "confetti";
+  const colors = ["#e8c66a","#7c8cff","#7ce0a3","#ff7a7a","#ffffff"];
+  for (let i = 0; i < 60; i++){
+    const p = document.createElement("i");
+    p.style.left = rand(100) + "%";
+    p.style.background = colors[rand(colors.length)];
+    p.style.animationDuration = (2.2 + Math.random() * 2) + "s";
+    p.style.animationDelay = (Math.random() * 1.2) + "s";
+    c.append(p);
+  }
+  document.body.append(c);
+  setTimeout(() => c.remove(), 6000);
+}
+
+/* ---------- boot ---------- */
+playerRows = (localStorage.getItem("ma:players") ? JSON.parse(localStorage.getItem("ma:players")) : defaultPlayers());
+if (!Array.isArray(playerRows) || playerRows.length < 4) playerRows = defaultPlayers();
+renderPlayers();
+loadModels();
+$("btn-add").onclick = () => { if (playerRows.length < 12){ playerRows.push("Player " + (playerRows.length + 1)); renderPlayers(); } };
+$("btn-test").onclick = testHost;
+$("btn-start").onclick = startGame;
+const savePlayers = () => localStorage.setItem("ma:players", JSON.stringify(playerRows));
+document.addEventListener("visibilitychange", savePlayers);
+window.addEventListener("pagehide", savePlayers);
+</script>
+</body>
+</html>
